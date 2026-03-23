@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Enable Cache Components (use cache directive) — Next.js 16
+  cacheComponents: true,
 };
 
 export default nextConfig;
