@@ -1,6 +1,8 @@
 import { router } from "@/lib/trpc/init";
+import { userRouter } from "@/lib/routers/user.router";
 
-// Sub-routers will be added here in subsequent commits
-export const appRouter = router({});
+export const appRouter = router({
+  user: userRouter,
+});
 
 export type AppRouter = typeof appRouter;
