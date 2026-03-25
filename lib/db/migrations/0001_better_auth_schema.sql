@@ -1,20 +1,3 @@
-import { betterAuth } from "better-auth";
-import { SqliteDialect } from "kysely";
-import Database from "better-sqlite3";
-
-// Separate better-sqlite3 instance for BetterAuth (WAL mode allows multiple readers)
-const globalForAuth = globalThis as unknown as { _authDb: Database.Database | undefined };
-
-const authDb =
-  globalForAuth._authDb ?? new Database(process.env.DATABASE_URL ?? "./db.sqlite");
-
-if (process.env.NODE_ENV !== "production") {
-  globalForAuth._authDb = authDb;
-}
-
-// Ensure BetterAuth core tables are present in auth DB before handling requests.
-// This runs in both dev and production, and avoids `no such table: user`.
-const authInitSql = `
 create table if not exists "user" ("id" text not null primary key, "name" text not null, "email" text not null unique, "emailVerified" integer not null, "image" text, "createdAt" date not null, "updatedAt" date not null);
 
 create table if not exists "session" ("id" text not null primary key, "expiresAt" date not null, "token" text not null unique, "createdAt" date not null, "updatedAt" date not null, "ipAddress" text, "userAgent" text, "userId" text not null references "user" ("id") on delete cascade);
@@ -28,21 +11,3 @@ create index if not exists "session_userId_idx" on "session" ("userId");
 create index if not exists "account_userId_idx" on "account" ("userId");
 
 create index if not exists "verification_identifier_idx" on "verification" ("identifier");
-`;
-
-try {
-  authDb.exec(authInitSql);
-} catch (err) {
-  console.error("BetterAuth init SQL failed:", err);
-}
-
-export const auth = betterAuth({
-  database: new SqliteDialect({ database: authDb }),
-  emailAndPassword: {
-    enabled: true,
-    minPasswordLength: 8,
-  },
-  secret: process.env.BETTER_AUTH_SECRET!,
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
-  trustedOrigins: [process.env.BETTER_AUTH_URL ?? "http://localhost:3000"],
-});
