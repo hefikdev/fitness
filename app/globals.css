@@ -71,11 +71,31 @@
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-anton);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, sans-serif;
+}
+
+/* Sporty heading utility */
+.heading {
+  font-family: var(--font-heading), var(--font-sans), sans-serif;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Neon accent glow */
+.neon {
+  color: var(--neon);
+  text-shadow: 0 0 8px var(--neon), 0 0 20px var(--neon);
+}
+
+.neon-border {
+  border-color: var(--neon);
+  box-shadow: 0 0 6px var(--neon);
 }
 
