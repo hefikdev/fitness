@@ -1,4 +1,5 @@
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
 
 export const userProfile = sqliteTable("user_profile", {
   id: text("id").primaryKey(),
@@ -89,3 +90,28 @@ export const weightEntry = sqliteTable("weight_entry", {
     .$defaultFn(() => new Date()),
   notes: text("notes"),
 });
+
+// ─── Relations ────────────────────────────────────────────────────────────────
+
+export const fitnessPlanRelations = relations(fitnessPlan, ({ many }) => ({
+  workouts: many(planWorkout),
+  enrollments: many(userPlanEnrollment),
+}));
+
+export const planWorkoutRelations = relations(planWorkout, ({ one, many }) => ({
+  plan: one(fitnessPlan, { fields: [planWorkout.planId], references: [fitnessPlan.id] }),
+  exercises: many(workoutExercise),
+  completions: many(userWorkoutCompletion),
+}));
+
+export const workoutExerciseRelations = relations(workoutExercise, ({ one }) => ({
+  workout: one(planWorkout, { fields: [workoutExercise.workoutId], references: [planWorkout.id] }),
+}));
+
+export const userPlanEnrollmentRelations = relations(userPlanEnrollment, ({ one }) => ({
+  plan: one(fitnessPlan, { fields: [userPlanEnrollment.planId], references: [fitnessPlan.id] }),
+}));
+
+export const userWorkoutCompletionRelations = relations(userWorkoutCompletion, ({ one }) => ({
+  workout: one(planWorkout, { fields: [userWorkoutCompletion.workoutId], references: [planWorkout.id] }),
+}));

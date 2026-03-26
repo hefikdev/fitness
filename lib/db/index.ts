@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import path from "path";
 import * as schema from "./schema";
+import { seedDatabase } from "./seed";
 
 // Singleton pattern — one connection reused across the lifetime of the Node.js process
 const globalForDb = globalThis as unknown as { _sqlite: Database.Database | undefined };
@@ -24,6 +25,7 @@ export const db = drizzle(sqlite, { schema });
   try {
     await migrate(db, { migrationsFolder: path.join(process.cwd(), "lib/db/migrations") });
     console.log("Drizzle migrations applied successfully.");
+    await seedDatabase(db);
   } catch (err) {
     console.error("Drizzle migration error:", err);
   }
