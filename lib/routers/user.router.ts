@@ -41,4 +41,20 @@ export const userRouter = router({
         });
       }
     }),
+
+  updateProfile: protectedProcedure
+    .input(
+      z.object({
+        goal: z.enum(["gain_mass", "lose_weight"]).optional(),
+        age: z.number().int().min(10).max(120).optional(),
+        gender: z.enum(["male", "female", "other"]).optional(),
+        currentWeightKg: z.number().min(20).max(500).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await db
+        .update(userProfile)
+        .set({ ...input, updatedAt: new Date() })
+        .where(eq(userProfile.userId, ctx.session.user.id));
+    }),
 });
