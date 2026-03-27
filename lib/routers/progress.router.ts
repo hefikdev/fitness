@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "@/lib/trpc/init";
 import { db } from "@/lib/db";
-import { userPlanEnrollment, userWorkoutCompletion } from "@/lib/db/schema";
+import { fitnessPlan, planWorkout, userPlanEnrollment, userWorkoutCompletion } from "@/lib/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -59,5 +59,37 @@ export const progressRouter = router({
       where: eq(userWorkoutCompletion.userId, ctx.session.user.id),
     });
     return completions.map((c) => c.workoutId);
+  }),
+
+  getActivePlan: protectedProcedure.query(async ({ ctx }) => {
+    const enrollment = await db.query.userPlanEnrollment.findFirst({
+      where: and(
+        eq(userPlanEnrollment.userId, ctx.session.user.id),
+        isNull(userPlanEnrollment.completedAt)
+      ),
+    });
+    if (!enrollment) return null;
+
+    const plan = await db.query.fitnessPlan.findFirst({
+      where: eq(fitnessPlan.id, enrollment.planId),
+    });
+    if (!plan) return null;
+
+    const totalWorkouts = await db.query.planWorkout.findMany({
+      where: eq(planWorkout.planId, plan.id),
+    });
+
+    const completions = await db.query.userWorkoutCompletion.findMany({
+      where: eq(userWorkoutCompletion.userId, ctx.session.user.id),
+    });
+    const completedIds = new Set(completions.map((c) => c.workoutId));
+    const completedCount = totalWorkouts.filter((w) => completedIds.has(w.id)).length;
+
+    return {
+      plan,
+      enrollmentId: enrollment.id,
+      completedCount,
+      totalCount: totalWorkouts.length,
+    };
   }),
 });

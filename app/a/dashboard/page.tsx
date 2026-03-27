@@ -6,11 +6,13 @@ import { trpc } from "@/lib/trpc/client";
 import { motion } from "motion/react";
 import { Dumbbell, Weight, TrendingUp, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 
 export default function DashboardPage() {
   const authSession = useStore(useSession);
   const profile = trpc.user.getProfile.useQuery();
+  const activePlan = trpc.progress.getActivePlan.useQuery();
   const name = authSession?.data?.user?.name ?? "Gość";
 
   const goalLabel =
@@ -19,6 +21,12 @@ export default function DashboardPage() {
       : profile.data?.goal === "lose_weight"
         ? "Redukcja wagi"
         : "–";
+
+  const activePlanLabel = activePlan.data?.plan?.name ?? "Brak";
+  const progressPct =
+    activePlan.data && activePlan.data.totalCount > 0
+      ? Math.round((activePlan.data.completedCount / activePlan.data.totalCount) * 100)
+      : 0;
 
   return (
     <main className="p-6 md:p-8 max-w-5xl mx-auto">
@@ -42,7 +50,7 @@ export default function DashboardPage() {
           <StatCard
             icon={<Dumbbell size={20} className="text-[var(--neon)]" />}
             label="Aktywny plan"
-            value="Brak"
+            value={activePlanLabel}
             delay={0}
           />
           <StatCard
@@ -58,6 +66,36 @@ export default function DashboardPage() {
             delay={0.2}
           />
         </div>
+
+        {/* Active plan widget */}
+        {activePlan.data && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.35 }}
+            className="mb-6"
+          >
+            <Link
+              href={`/a/plans/${activePlan.data.plan.id}`}
+              className="group block rounded-xl border border-border hover:border-[var(--neon)] transition-colors p-5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">Aktywny plan</p>
+                  <p className="heading text-xl neon">{activePlan.data.plan.name}</p>
+                </div>
+                <ChevronRight
+                  size={20}
+                  className="text-muted-foreground group-hover:text-[var(--neon)] transition-colors"
+                />
+              </div>
+              <Progress value={progressPct} className="h-2 mb-1" />
+              <p className="text-xs text-muted-foreground">
+                {activePlan.data.completedCount} / {activePlan.data.totalCount} treningów ukończonych ({progressPct}%)
+              </p>
+            </Link>
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-1 gap-3">
           <QuickLink
