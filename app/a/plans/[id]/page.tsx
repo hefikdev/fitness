@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Calendar,
@@ -92,10 +93,12 @@ function WorkoutItem({
   workout: Workout;
   isCompleted: boolean;
   isEnrolled: boolean;
-  onComplete: () => void;
+  onComplete: (notes?: string) => void;
   completing: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
+  const [notes, setNotes] = useState("");
 
   return (
     <motion.div
@@ -154,15 +157,45 @@ function WorkoutItem({
               ))}
 
               {isEnrolled && !isCompleted && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mt-3 w-full border-[var(--neon)]/50 text-[var(--neon)] hover:bg-[var(--neon)]/10"
-                  onClick={onComplete}
-                  disabled={completing}
-                >
-                  {completing ? "Zapisuję…" : "Oznacz jako ukończony"}
-                </Button>
+                <div className="mt-3 space-y-2">
+                  {showNotes ? (
+                    <>
+                      <textarea
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Notatki z treningu (opcjonalnie)…"
+                        rows={3}
+                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[var(--neon)]/50 resize-none"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          className="flex-1 bg-[var(--neon)] text-black hover:bg-[var(--neon)]/80"
+                          onClick={() => onComplete(notes)}
+                          disabled={completing}
+                        >
+                          {completing ? "Zapisuję…" : "Potwierdź ukończenie"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setShowNotes(false)}
+                        >
+                          Anuluj
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full border-[var(--neon)]/50 text-[var(--neon)] hover:bg-[var(--neon)]/10"
+                      onClick={() => setShowNotes(true)}
+                    >
+                      Oznacz jako ukończony
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           </motion.div>
@@ -185,7 +218,12 @@ export default function PlanDetailPage() {
     onSuccess: () => utils.progress.getEnrollments.invalidate(),
   });
   const completeWorkoutMutation = trpc.progress.completeWorkout.useMutation({
-    onSuccess: () => utils.progress.getCompletedWorkouts.invalidate(),
+    onSuccess: () => {
+      utils.progress.getCompletedWorkouts.invalidate();
+      toast.success("Trening ukończony! 💪", {
+        description: "Świetna robota! Twój postęp został zapisany.",
+      });
+    },
   });
 
   const enrollment = enrollments?.find((e) => e.planId === id);
@@ -293,7 +331,7 @@ export default function PlanDetailPage() {
             workout={workout}
             isCompleted={completedWorkoutIds?.includes(workout.id) ?? false}
             isEnrolled={!!enrollment}
-            onComplete={() => completeWorkoutMutation.mutate({ workoutId: workout.id })}
+            onComplete={(notes) => completeWorkoutMutation.mutate({ workoutId: workout.id, notes })}
             completing={completeWorkoutMutation.isPending}
           />
         ))}
