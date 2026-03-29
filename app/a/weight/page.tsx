@@ -9,6 +9,103 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2, TrendingDown, TrendingUp, Minus } from "lucide-react";
 
+type WeightEntry = { id: string; weightKg: number; recordedAt: Date | string; notes: string | null };
+
+function WeightChart({ entries }: { entries: WeightEntry[] }) {
+  if (entries.length < 2) return null;
+
+  // entries are newest-first, reverse for chart
+  const sorted = [...entries].reverse();
+  const weights = sorted.map((e) => e.weightKg);
+  const minW = Math.min(...weights);
+  const maxW = Math.max(...weights);
+  const range = maxW - minW || 1;
+
+  const W = 600;
+  const H = 120;
+  const PAD = { top: 16, right: 24, bottom: 24, left: 44 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top - PAD.bottom;
+
+  const xOf = (i: number) => PAD.left + (i / (sorted.length - 1)) * chartW;
+  const yOf = (w: number) => PAD.top + chartH - ((w - minW) / range) * chartH;
+
+  const linePath = sorted
+    .map((e, i) => `${i === 0 ? "M" : "L"} ${xOf(i).toFixed(1)} ${yOf(e.weightKg).toFixed(1)}`)
+    .join(" ");
+
+  const areaPath =
+    linePath +
+    ` L ${xOf(sorted.length - 1).toFixed(1)} ${(PAD.top + chartH).toFixed(1)}` +
+    ` L ${xOf(0).toFixed(1)} ${(PAD.top + chartH).toFixed(1)} Z`;
+
+  // Y axis labels
+  const yLabels = [minW, minW + range / 2, maxW].map((v) => ({
+    val: v.toFixed(1),
+    y: yOf(v),
+  }));
+
+  return (
+    <div className="rounded-xl border border-border bg-secondary/20 p-4 mb-8">
+      <p className="text-xs text-muted-foreground mb-3">Wykres wagi</p>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto overflow-visible">
+        <defs>
+          <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#39ff14" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#39ff14" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* Grid lines */}
+        {yLabels.map((l) => (
+          <g key={l.val}>
+            <line
+              x1={PAD.left}
+              x2={W - PAD.right}
+              y1={l.y}
+              y2={l.y}
+              stroke="currentColor"
+              strokeOpacity="0.1"
+              strokeWidth="1"
+            />
+            <text
+              x={PAD.left - 6}
+              y={l.y + 4}
+              textAnchor="end"
+              fontSize="10"
+              fill="currentColor"
+              opacity="0.5"
+            >
+              {l.val}
+            </text>
+          </g>
+        ))}
+        {/* Area fill */}
+        <path d={areaPath} fill="url(#wg)" />
+        {/* Line */}
+        <path d={linePath} fill="none" stroke="#39ff14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Dots */}
+        {sorted.map((e, i) => (
+          <circle key={i} cx={xOf(i)} cy={yOf(e.weightKg)} r="3.5" fill="#39ff14" />
+        ))}
+        {/* X axis first/last label */}
+        {[0, sorted.length - 1].map((i) => (
+          <text
+            key={i}
+            x={xOf(i)}
+            y={H - 4}
+            textAnchor={i === 0 ? "start" : "end"}
+            fontSize="10"
+            fill="currentColor"
+            opacity="0.5"
+          >
+            {new Date(sorted[i].recordedAt).toLocaleDateString("pl-PL", { day: "numeric", month: "short" })}
+          </text>
+        ))}
+      </svg>
+    </div>
+  );
+}
+
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString("pl-PL", {
     day: "numeric",
@@ -100,6 +197,9 @@ export default function WeightPage() {
             )}
           </div>
         )}
+
+        {/* Chart */}
+        {entries && entries.length >= 2 && <WeightChart entries={entries} />}
 
         {/* Add form */}
         <form
