@@ -225,6 +225,15 @@ export default function PlanDetailPage() {
       });
     },
   });
+  const markPlanCompleteMutation = trpc.progress.markPlanComplete.useMutation({
+    onSuccess: () => {
+      utils.progress.getEnrollments.invalidate();
+      utils.progress.getActivePlan.invalidate();
+      toast.success("Plan ukończony! 🏆", {
+        description: "Gratulacje! Ukończyłeś cały plan treningowy.",
+      });
+    },
+  });
 
   const enrollment = enrollments?.find((e) => e.planId === id);
 
@@ -303,6 +312,21 @@ export default function PlanDetailPage() {
             </p>
             <Progress value={progressPercent} className="h-2 mb-1" />
             <p className="text-xs text-muted-foreground mt-1">{progressPercent}% ukończono</p>
+            {progressPercent === 100 && !enrollment.completedAt && (
+              <Button
+                className="mt-4 bg-[var(--neon)] text-black hover:bg-[var(--neon)]/80"
+                onClick={() => markPlanCompleteMutation.mutate({ enrollmentId: enrollment.id })}
+                disabled={markPlanCompleteMutation.isPending}
+              >
+                {markPlanCompleteMutation.isPending ? "Zapisuję…" : "Zakończ plan 🏆"}
+              </Button>
+            )}
+            {enrollment.completedAt && (
+              <p className="text-xs text-[var(--neon)] mt-3 flex items-center gap-1">
+                <CheckCircle2 size={13} />
+                Plan ukończony
+              </p>
+            )}
           </div>
         ) : (
           <div className="flex items-center justify-between gap-4 flex-wrap">

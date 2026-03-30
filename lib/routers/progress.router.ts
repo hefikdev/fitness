@@ -92,4 +92,21 @@ export const progressRouter = router({
       totalCount: totalWorkouts.length,
     };
   }),
+
+  markPlanComplete: protectedProcedure
+    .input(z.object({ enrollmentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const enrollment = await db.query.userPlanEnrollment.findFirst({
+        where: and(
+          eq(userPlanEnrollment.id, input.enrollmentId),
+          eq(userPlanEnrollment.userId, ctx.session.user.id),
+          isNull(userPlanEnrollment.completedAt)
+        ),
+      });
+      if (!enrollment) throw new Error("Enrollment not found");
+      await db
+        .update(userPlanEnrollment)
+        .set({ completedAt: new Date() })
+        .where(eq(userPlanEnrollment.id, input.enrollmentId));
+    }),
 });
