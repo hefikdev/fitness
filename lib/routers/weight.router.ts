@@ -2,7 +2,7 @@ import { z } from "zod";
 import { router, protectedProcedure } from "@/lib/trpc/init";
 import { db } from "@/lib/db";
 import { weightEntry } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export const weightRouter = router({
@@ -34,12 +34,13 @@ export const weightRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const entry = await db.query.weightEntry.findFirst({
-        where: eq(weightEntry.id, input.id),
-      });
-      if (!entry || entry.userId !== ctx.session.user.id) {
-        throw new Error("Not found");
-      }
-      await db.delete(weightEntry).where(eq(weightEntry.id, input.id));
+      await db
+        .delete(weightEntry)
+        .where(
+          and(
+            eq(weightEntry.id, input.id),
+            eq(weightEntry.userId, ctx.session.user.id)
+          )
+        );
     }),
 });
