@@ -13,7 +13,9 @@ export default function DashboardPage() {
   const authSession = useStore(useSession);
   const profile = trpc.user.getProfile.useQuery();
   const activePlan = trpc.progress.getActivePlan.useQuery();
+  const weightEntries = trpc.weight.list.useQuery();
   const name = authSession?.data?.user?.name ?? "Gość";
+  const latestWeight = weightEntries.data?.[0]?.weightKg ?? profile.data?.currentWeightKg;
 
   const goalLabel =
     profile.data?.goal === "gain_mass"
@@ -56,7 +58,7 @@ export default function DashboardPage() {
           <StatCard
             icon={<Weight size={20} className="text-[var(--neon)]" />}
             label="Aktualna waga"
-            value={profile.data?.currentWeightKg ? `${profile.data.currentWeightKg} kg` : "–"}
+            value={latestWeight ? `${latestWeight} kg` : "–"}
             delay={0.1}
           />
           <StatCard
