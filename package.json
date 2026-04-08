@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "predev": "node -e \"import { rmSync } from 'node:fs'; ['.next', '.turbo'].forEach((path) => rmSync(path, { recursive: true, force: true }));\"",
+    "dev": "next dev --turbo",
+    "prebuild": "node -e \"import { rmSync } from 'node:fs'; ['.next', '.turbo'].forEach((path) => rmSync(path, { recursive: true, force: true }));\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
