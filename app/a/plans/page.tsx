@@ -5,8 +5,9 @@ import { motion } from "motion/react";
 import { trpc } from "@/lib/trpc/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock } from "lucide-react";
+import { CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
 
 type Category = "all" | "strength" | "cardio" | "hiit" | "flexibility";
@@ -56,7 +57,25 @@ type Plan = {
   imageSlug: string;
 };
 
-function PlanCard({ plan, index }: { plan: Plan; index: number }) {
+type Enrollment = {
+  planId: string;
+  completedAt: Date | string | null;
+};
+
+function PlanCard({
+  plan,
+  index,
+  enrollment,
+  progressPct,
+}: {
+  plan: Plan;
+  index: number;
+  enrollment?: Enrollment;
+  progressPct?: number;
+}) {
+  const isCompleted = !!enrollment?.completedAt;
+  const isActive = !!enrollment && !isCompleted;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 14 }}
@@ -64,14 +83,40 @@ function PlanCard({ plan, index }: { plan: Plan; index: number }) {
       transition={{ delay: index * 0.06, duration: 0.3 }}
     >
       <Link href={`/a/plans/${plan.id}`} className="block h-full group">
-        <div className="h-full rounded-xl border border-border overflow-hidden hover:border-[var(--neon)] transition-colors">
+        <div
+          className={[
+            "h-full rounded-xl border overflow-hidden transition-colors",
+            isCompleted
+              ? "border-[var(--neon)]/40 hover:border-[var(--neon)]"
+              : isActive
+                ? "border-[var(--neon)]/60 hover:border-[var(--neon)]"
+                : "border-border hover:border-[var(--neon)]",
+          ].join(" ")}
+        >
           <div
-            className={`h-28 bg-gradient-to-br ${categoryGradients[plan.category] ?? "from-secondary"} bg-secondary flex items-end p-4`}
+            className={`relative h-28 bg-gradient-to-br ${categoryGradients[plan.category] ?? "from-secondary"} bg-secondary flex items-end p-4`}
           >
             <span className="heading text-2xl neon line-clamp-1">{plan.name}</span>
+            {isCompleted && (
+              <span className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-medium text-[var(--neon)] bg-[var(--neon)]/10 border border-[var(--neon)]/30 rounded-full px-2 py-0.5">
+                <CheckCircle2 size={10} />
+                Ukończony
+              </span>
+            )}
+            {isActive && (
+              <span className="absolute top-3 right-3 text-[10px] font-medium text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 rounded-full px-2 py-0.5">
+                W trakcie
+              </span>
+            )}
           </div>
           <div className="p-4 flex flex-col gap-3">
             <p className="text-sm text-muted-foreground line-clamp-2">{plan.description}</p>
+            {isActive && typeof progressPct === "number" && (
+              <div>
+                <Progress value={progressPct} className="h-1.5 mb-0.5" />
+                <p className="text-[10px] text-muted-foreground">{progressPct}% ukończono</p>
+              </div>
+            )}
             <div className="flex items-center gap-2 flex-wrap mt-auto">
               <Badge variant="outline">{categoryLabels[plan.category]}</Badge>
               <span className={`text-xs font-medium ${difficultyClasses[plan.difficulty]}`}>
@@ -90,9 +135,11 @@ function PlanCard({ plan, index }: { plan: Plan; index: number }) {
 }
 
 function PlanGrid({ category }: { category: Category }) {
-  const { data: plans, isPending } = trpc.plans.list.useQuery({ category });
+  const { data: plans, isPending: plansLoading } = trpc.plans.list.useQuery({ category });
+  const { data: enrollments } = trpc.progress.getEnrollments.useQuery();
+  const activePlan = trpc.progress.getActivePlan.useQuery();
 
-  if (isPending) {
+  if (plansLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -112,9 +159,22 @@ function PlanGrid({ category }: { category: Category }) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {plans.map((plan, i) => (
-        <PlanCard key={plan.id} plan={plan} index={i} />
-      ))}
+      {plans.map((plan, i) => {
+        const enrollment = enrollments?.find((e) => e.planId === plan.id);
+        const progressPct =
+          activePlan.data?.plan.id === plan.id && activePlan.data.totalCount > 0
+            ? Math.round((activePlan.data.completedCount / activePlan.data.totalCount) * 100)
+            : undefined;
+        return (
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            index={i}
+            enrollment={enrollment}
+            progressPct={progressPct}
+          />
+        );
+      })}
     </div>
   );
 }
