@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Trash2, TrendingDown, TrendingUp, Minus } from "lucide-react";
 
 type WeightEntry = { id: string; weightKg: number; recordedAt: Date | string; notes: string | null };
@@ -118,6 +126,7 @@ export default function WeightPage() {
   const [kg, setKg] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const utils = trpc.useUtils();
   const { data: entries, isPending } = trpc.weight.list.useQuery();
@@ -281,7 +290,7 @@ export default function WeightPage() {
                       {formatDate(entry.recordedAt)}
                     </span>
                     <button
-                      onClick={() => remove.mutate({ id: entry.id })}
+                      onClick={() => setConfirmId(entry.id)}
                       disabled={remove.isPending}
                       className="text-muted-foreground hover:text-destructive transition-colors"
                     >
@@ -294,6 +303,34 @@ export default function WeightPage() {
           </div>
         )}
       </motion.div>
+
+      <Dialog open={!!confirmId} onOpenChange={(open) => { if (!open) setConfirmId(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Usuń pomiar</DialogTitle>
+            <DialogDescription>
+              Czy na pewno chcesz usunąć ten pomiar? Tej operacji nie można cofnąć.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConfirmId(null)}>
+              Anuluj
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={remove.isPending}
+              onClick={() => {
+                if (confirmId) {
+                  remove.mutate({ id: confirmId });
+                  setConfirmId(null);
+                }
+              }}
+            >
+              Usuń
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
