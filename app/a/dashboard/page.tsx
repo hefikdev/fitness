@@ -114,22 +114,40 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-3">
           <QuickLink
-            href="/a/plans"
-            label="Przeglądaj plany treningowe"
-            sub="Znajdź plan dopasowany do Twoich celów"
+            href="/a/analytics"
+            label="Przegląd analityki"
+            sub="Zobacz swoje dane i postępy"
             delay={0.3}
           />
           <QuickLink
-            href="/a/weight"
-            label="Zapisz wagę"
-            sub="Śledź swój postęp na osi czasu"
+            href="/a/workout-library"
+            label="Biblioteka treningów"
+            sub="Przeglądaj przykładowe sesje treningowe"
             delay={0.4}
+          />
+          <QuickLink
+            href="/a/plans"
+            label="Przeglądaj plany treningowe"
+            sub="Znajdź plan dopasowany do Twoich celów"
+            delay={0.5}
           />
           <QuickLink
             href="/a/diet"
             label="Odkryj przepisy"
             sub="Posiłki wspierające Twoje cele"
-            delay={0.5}
+            delay={0.6}
+          />
+          <QuickLink
+            href="/a/nutrition"
+            label="Poradnik odżywiania"
+            sub="Szybkie wskazówki żywieniowe"
+            delay={0.7}
+          />
+          <QuickLink
+            href="/a/tips"
+            label="Porady i regeneracja"
+            sub="Małe zmiany, lepsze wyniki"
+            delay={0.8}
           />
         </div>
       </motion.div>

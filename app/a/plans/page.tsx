@@ -190,26 +190,25 @@ export default function PlansPage() {
             Wybierz plan dopasowany do swoich celów
           </p>
         </div>
-        <nav
-          className="flex flex-wrap items-center gap-2 rounded-3xl border border-border bg-background/95 p-2 shadow-sm"
-          aria-label="Kategorie planów"
-        >
-          {categories.map((c) => (
-            <button
-              key={c.value}
-              type="button"
-              onClick={() => setCategory(c.value)}
-              className={
-                "rounded-full px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--neon)] " +
-                (category === c.value
-                  ? "bg-[var(--neon)]/10 text-[var(--neon)] border border-[var(--neon)]"
-                  : "bg-transparent text-muted-foreground border border-transparent hover:text-foreground hover:border-border")
-              }
-              aria-pressed={category === c.value}
-            >
-              {c.label}
-            </button>
-          ))}
+        <nav className="overflow-x-auto pb-1" aria-label="Kategorie planów">
+          <div className="inline-flex items-center gap-2 rounded-3xl border border-border bg-background/95 p-2 shadow-sm min-w-max">
+            {categories.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                onClick={() => setCategory(c.value)}
+                className={
+                  "rounded-full px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--neon)] " +
+                  (category === c.value
+                    ? "bg-[var(--neon)]/10 text-[var(--neon)] border border-[var(--neon)]"
+                    : "bg-transparent text-muted-foreground border border-transparent hover:text-foreground hover:border-border")
+                }
+                aria-pressed={category === c.value}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
         </nav>
       </div>
 

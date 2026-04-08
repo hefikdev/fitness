@@ -1,4 +1,5 @@
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { eq } from "drizzle-orm";
 import * as schema from "./schema";
 
 type DB = BetterSQLite3Database<typeof schema>;
@@ -273,13 +274,352 @@ const PLANS: Array<{
       },
     ],
   },
+  {
+    plan: {
+      id: "plan-strength-002",
+      name: "Budowanie Masy 5x",
+      description: "Pięciodniowy plan siłowy ukierunkowany na duże ciężary i regenerację.",
+      category: "strength",
+      difficulty: "intermediate",
+      durationWeeks: 10,
+      targetGoal: "gain_mass",
+      imageSlug: "strength-mass-5x",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-strength-5x",
+          planId: "plan-strength-002",
+          dayNumber: 1,
+          title: "Full Body Heavy",
+          description: "Trening całego ciała z głównym naciskiem na siłę.",
+          durationMinutes: 70,
+          imageSlug: "fullbody-heavy",
+        },
+        exercises: [
+          { id: "ex-s5x-1", workoutId: "wo-strength-5x", order: 1, name: "Przysiad tylni", description: "Podstawowe ćwiczenie na siłę nóg", sets: 4, reps: 6, durationSeconds: null, imageSlug: "back-squat" },
+          { id: "ex-s5x-2", workoutId: "wo-strength-5x", order: 2, name: "Wyciskanie na ławce", description: "Mocne piersi i triceps", sets: 4, reps: 6, durationSeconds: null, imageSlug: "bench-press" },
+          { id: "ex-s5x-3", workoutId: "wo-strength-5x", order: 3, name: "Wiosłowanie sztangą", description: "Buduje masę pleców", sets: 4, reps: 6, durationSeconds: null, imageSlug: "barbell-row" },
+          { id: "ex-s5x-4", workoutId: "wo-strength-5x", order: 4, name: "Martwy ciąg klasyczny", description: "Pełne plecy i tył uda", sets: 3, reps: 5, durationSeconds: null, imageSlug: "deadlift" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-strength-003",
+      name: "Siła Związana z Obciążeniem",
+      description: "Zaawansowany plan siłowy z progresją ciężaru i kluczową techniką.",
+      category: "strength",
+      difficulty: "advanced",
+      durationWeeks: 8,
+      targetGoal: "gain_mass",
+      imageSlug: "strength-power",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-strength-power",
+          planId: "plan-strength-003",
+          dayNumber: 1,
+          title: "Trening Power",
+          description: "Mega ciężary, niskie powtórzenia i dłuższe przerwy.",
+          durationMinutes: 70,
+          imageSlug: "power-training",
+        },
+        exercises: [
+          { id: "ex-sp-1", workoutId: "wo-strength-power", order: 1, name: "Martwy ciąg", description: "Podstawowe ćwiczenie na siłę całego ciała", sets: 5, reps: 5, durationSeconds: null, imageSlug: "deadlift" },
+          { id: "ex-sp-2", workoutId: "wo-strength-power", order: 2, name: "Wyciskanie żołnierskie", description: "Barki i triceps z ciężarem w górze", sets: 4, reps: 6, durationSeconds: null, imageSlug: "military-press" },
+          { id: "ex-sp-3", workoutId: "wo-strength-power", order: 3, name: "Podciąganie szerokim nachwytem", description: "Mocne plecy i biceps", sets: 4, reps: 6, durationSeconds: null, imageSlug: "wide-pullup" },
+          { id: "ex-sp-4", workoutId: "wo-strength-power", order: 4, name: "Przysiad przedni", description: "Siła nóg i stabilizacja tułowia", sets: 4, reps: 6, durationSeconds: null, imageSlug: "front-squat" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-cardio-002",
+      name: "Kardio Obwodowe",
+      description: "Obwodowy plan spalający tłuszcz, wzmacniający wydolność i przyspieszający metabolizm.",
+      category: "cardio",
+      difficulty: "intermediate",
+      durationWeeks: 6,
+      targetGoal: "lose_weight",
+      imageSlug: "cardio-circuit",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-cardio-circuit",
+          planId: "plan-cardio-002",
+          dayNumber: 1,
+          title: "Obwód Funkcjonalny",
+          description: "6 stacji z minimalnymi przerwami dla spalania tłuszczu.",
+          durationMinutes: 45,
+          imageSlug: "functional-circuit",
+        },
+        exercises: [
+          { id: "ex-cc-1", workoutId: "wo-cardio-circuit", order: 1, name: "Burpees", description: "Wysokointensywne spalanie", sets: 4, reps: 12, durationSeconds: null, imageSlug: "burpees" },
+          { id: "ex-cc-2", workoutId: "wo-cardio-circuit", order: 2, name: "Skakanka", description: "Szybkie skoki na wytrzymałość", sets: 4, reps: null, durationSeconds: 120, imageSlug: "jump-rope" },
+          { id: "ex-cc-3", workoutId: "wo-cardio-circuit", order: 3, name: "Mountain Climbers", description: "Praca core i serca jednocześnie", sets: 4, reps: null, durationSeconds: 45, imageSlug: "mountain-climbers" },
+          { id: "ex-cc-4", workoutId: "wo-cardio-circuit", order: 4, name: "Wykroki z wyskokiem", description: "Dynamiczne nogi i wytrzymałość", sets: 4, reps: 12, durationSeconds: null, imageSlug: "jump-lunges" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-cardio-003",
+      name: "Kardio na Świeżym Powietrzu",
+      description: "Plan plenerowy z bieganiem, sprintami i ćwiczeniami mobilizującymi.",
+      category: "cardio",
+      difficulty: "intermediate",
+      durationWeeks: 5,
+      targetGoal: "lose_weight",
+      imageSlug: "outdoor-cardio",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-cardio-outdoor",
+          planId: "plan-cardio-003",
+          dayNumber: 1,
+          title: "Bieg i Sprinty",
+          description: "Naturalne cardio z szybkością i wytrzymałością.",
+          durationMinutes: 50,
+          imageSlug: "run-sprints",
+        },
+        exercises: [
+          { id: "ex-co-1", workoutId: "wo-cardio-outdoor", order: 1, name: "Bieg ciągły", description: "Tempo komfortowe dla 20 minut", sets: 1, reps: null, durationSeconds: 1200, imageSlug: "steady-run" },
+          { id: "ex-co-2", workoutId: "wo-cardio-outdoor", order: 2, name: "Sprinty 100m", description: "Krótki sprint z pełną prędkością", sets: 6, reps: null, durationSeconds: null, imageSlug: "sprints" },
+          { id: "ex-co-3", workoutId: "wo-cardio-outdoor", order: 3, name: "Marsz regeneracyjny", description: "Odpoczynek aktywny po sprintach", sets: 1, reps: null, durationSeconds: 600, imageSlug: "walk" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-hiit-002",
+      name: "HIIT dla Początkujących",
+      description: "Krótki, przystępny program HIIT, który przyspiesza metabolizm bez przeciążania stawów.",
+      category: "hiit",
+      difficulty: "beginner",
+      durationWeeks: 4,
+      targetGoal: "lose_weight",
+      imageSlug: "hiit-beginner",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-hiit-beginner",
+          planId: "plan-hiit-002",
+          dayNumber: 1,
+          title: "Wprowadzenie do HIIT",
+          description: "Umiarkowane interwały dla lepszej kondycji.",
+          durationMinutes: 30,
+          imageSlug: "beginner-hiit",
+        },
+        exercises: [
+          { id: "ex-hb-1", workoutId: "wo-hiit-beginner", order: 1, name: "Pajacyki", description: "Klasyczne pajacyki na rozgrzewkę", sets: 3, reps: 30, durationSeconds: null, imageSlug: "jumping-jacks" },
+          { id: "ex-hb-2", workoutId: "wo-hiit-beginner", order: 2, name: "Przysiad z wyskokiem", description: "Lekka eksplozywność dla nóg", sets: 3, reps: 12, durationSeconds: null, imageSlug: "jump-squat" },
+          { id: "ex-hb-3", workoutId: "wo-hiit-beginner", order: 3, name: "Rowerek leżący", description: "Ćwiczenie wzmacniające core", sets: 3, reps: null, durationSeconds: 60, imageSlug: "bicycle-crunch" },
+          { id: "ex-hb-4", workoutId: "wo-hiit-beginner", order: 4, name: "Deska", description: "Stabilizacja i napięcie mięśni brzucha", sets: 3, reps: null, durationSeconds: 45, imageSlug: "plank" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-hiit-003",
+      name: "HIIT w Parze",
+      description: "Program treningowy dla dwóch osób z elementami współpracy i rywalizacji.",
+      category: "hiit",
+      difficulty: "intermediate",
+      durationWeeks: 5,
+      targetGoal: "both",
+      imageSlug: "hiit-pair",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-hiit-pair",
+          planId: "plan-hiit-003",
+          dayNumber: 1,
+          title: "Partner HIIT",
+          description: "Partnerstwo i intensywność w jednym treningu.",
+          durationMinutes: 45,
+          imageSlug: "partner-hiit",
+        },
+        exercises: [
+          { id: "ex-hp-1", workoutId: "wo-hiit-pair", order: 1, name: "Skok w przód", description: "Dynamiczne przysiady z przeskokiem", sets: 3, reps: 15, durationSeconds: null, imageSlug: "forward-jump" },
+          { id: "ex-hp-2", workoutId: "wo-hiit-pair", order: 2, name: "Wyskok z przysiadu", description: "Maksymalna eksplozywność nóg", sets: 3, reps: 12, durationSeconds: null, imageSlug: "jump-squat" },
+          { id: "ex-hp-3", workoutId: "wo-hiit-pair", order: 3, name: "Mountain Climbers", description: "Dynamiczna praca całego ciała", sets: 3, reps: null, durationSeconds: 45, imageSlug: "mountain-climbers" },
+          { id: "ex-hp-4", workoutId: "wo-hiit-pair", order: 4, name: "Pompki", description: "Wspólna seria na klatkę i triceps", sets: 3, reps: 12, durationSeconds: null, imageSlug: "push-ups" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-flex-002",
+      name: "Rozciąganie Grzbietu",
+      description: "Plan dedykowany rozciąganiu i regeneracji odcinka lędźwiowego oraz piersiowego.",
+      category: "flexibility",
+      difficulty: "beginner",
+      durationWeeks: 5,
+      targetGoal: "both",
+      imageSlug: "back-stretch",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-flex-back",
+          planId: "plan-flex-002",
+          dayNumber: 1,
+          title: "Stretch pleców",
+          description: "Bezpieczne rozciąganie i mobilizacja kręgosłupa.",
+          durationMinutes: 35,
+          imageSlug: "back-stretch-workout",
+        },
+        exercises: [
+          { id: "ex-fb-1", workoutId: "wo-flex-back", order: 1, name: "Koci grzbiet", description: "Rozciąganie kręgosłupa i mobilność", sets: 3, reps: 10, durationSeconds: null, imageSlug: "cat-cow" },
+          { id: "ex-fb-2", workoutId: "wo-flex-back", order: 2, name: "Mostek", description: "Delikatne otwarcie klatki piersiowej i spięć pleców", sets: 3, reps: 8, durationSeconds: null, imageSlug: "bridge" },
+          { id: "ex-fb-3", workoutId: "wo-flex-back", order: 3, name: "Skręty tułowia", description: "Kontrolowane skręty dla kręgosłupa", sets: 3, reps: 10, durationSeconds: null, imageSlug: "spinal-twist" },
+          { id: "ex-fb-4", workoutId: "wo-flex-back", order: 4, name: "Rozciąganie bioder", description: "Odciążenie lędźwi i miednicy", sets: 3, reps: null, durationSeconds: 45, imageSlug: "hip-stretch" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-flex-003",
+      name: "Elastyczność Bioder",
+      description: "Program koncentrujący się na otwarciu i mobilności bioder.",
+      category: "flexibility",
+      difficulty: "beginner",
+      durationWeeks: 4,
+      targetGoal: "both",
+      imageSlug: "hip-flexibility",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-flex-hips",
+          planId: "plan-flex-003",
+          dayNumber: 1,
+          title: "Mobilność bioder",
+          description: "Ćwiczenia na otwarcie bioder i poprawę zakresu ruchu.",
+          durationMinutes: 30,
+          imageSlug: "hip-mobility",
+        },
+        exercises: [
+          { id: "ex-fh-1", workoutId: "wo-flex-hips", order: 1, name: "Wykroki z rotacją", description: "Biodra i miednica w ruchu", sets: 3, reps: 10, durationSeconds: null, imageSlug: "lunge-rotation" },
+          { id: "ex-fh-2", workoutId: "wo-flex-hips", order: 2, name: "Pozycja gołębia", description: "Głębokie rozciągnięcie zewnętrznej strony biodra", sets: 2, reps: null, durationSeconds: 45, imageSlug: "pigeon-pose" },
+          { id: "ex-fh-3", workoutId: "wo-flex-hips", order: 3, name: "Mostek biodrowy", description: "Aktywacja pośladków i otwarcie bioder", sets: 3, reps: 12, durationSeconds: null, imageSlug: "glute-bridge" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-flex-004",
+      name: "Równowaga i Core",
+      description: "Program łączący równowagę z silnym centrum ciała.",
+      category: "flexibility",
+      difficulty: "intermediate",
+      durationWeeks: 6,
+      targetGoal: "both",
+      imageSlug: "balance-core",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-flex-balance",
+          planId: "plan-flex-004",
+          dayNumber: 1,
+          title: "Stabilność i Core",
+          description: "Ćwiczenia na równowagę, stabilizację i mobilność.",
+          durationMinutes: 40,
+          imageSlug: "balance-core-workout",
+        },
+        exercises: [
+          { id: "ex-fb-1", workoutId: "wo-flex-balance", order: 1, name: "Deska boczna", description: "Boczny core i stabilizacja", sets: 3, reps: null, durationSeconds: 35, imageSlug: "side-plank" },
+          { id: "ex-fb-2", workoutId: "wo-flex-balance", order: 2, name: "Przyciąganie kolan", description: "Kontrola centralnej części ciała", sets: 3, reps: 12, durationSeconds: null, imageSlug: "knee-tuck" },
+          { id: "ex-fb-3", workoutId: "wo-flex-balance", order: 3, name: "Stanie na jednej nodze", description: "Równowaga i aktywacja mięśni stop", sets: 3, reps: null, durationSeconds: 30, imageSlug: "single-leg-stand" },
+          { id: "ex-fb-4", workoutId: "wo-flex-balance", order: 4, name: "Bird Dog", description: "Stabilizacja i ruch kończyn na zmianę", sets: 3, reps: 10, durationSeconds: null, imageSlug: "bird-dog" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-strength-004",
+      name: "Full Body 3 Dni",
+      description: "Plan trzech dni tygodniowo z pełnym treningiem całego ciała.",
+      category: "strength",
+      difficulty: "intermediate",
+      durationWeeks: 8,
+      targetGoal: "both",
+      imageSlug: "full-body-3day",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-strength-fullbody",
+          planId: "plan-strength-004",
+          dayNumber: 1,
+          title: "Full Body Kompletny",
+          description: "Pełny trening z równym obciążeniem wszystkich partii.",
+          durationMinutes: 65,
+          imageSlug: "fullbody-workout",
+        },
+        exercises: [
+          { id: "ex-sfb-1", workoutId: "wo-strength-fullbody", order: 1, name: "Przysiad z kettlebellem", description: "Siła nóg i stabilizacja tułowia", sets: 4, reps: 10, durationSeconds: null, imageSlug: "kettlebell-squat" },
+          { id: "ex-sfb-2", workoutId: "wo-strength-fullbody", order: 2, name: "Podciąganie", description: "Plecy i biceps", sets: 4, reps: 8, durationSeconds: null, imageSlug: "pull-up" },
+          { id: "ex-sfb-3", workoutId: "wo-strength-fullbody", order: 3, name: "Wyciskanie hantli", description: "Klatka i barki", sets: 4, reps: 10, durationSeconds: null, imageSlug: "dumbbell-press" },
+          { id: "ex-sfb-4", workoutId: "wo-strength-fullbody", order: 4, name: "Martwy ciąg rumuński", description: "Tylna część uda i pośladki", sets: 3, reps: 10, durationSeconds: null, imageSlug: "romanian-deadlift" },
+        ],
+      },
+    ],
+  },
+  {
+    plan: {
+      id: "plan-cardio-004",
+      name: "Kardio + Siła",
+      description: "Trening łączący elementy cardio z krótkimi sesjami siłowymi.",
+      category: "cardio",
+      difficulty: "intermediate",
+      durationWeeks: 6,
+      targetGoal: "both",
+      imageSlug: "cardio-strength",
+    },
+    workouts: [
+      {
+        workout: {
+          id: "wo-cardio-strength",
+          planId: "plan-cardio-004",
+          dayNumber: 1,
+          title: "Kardio+Siła Mix",
+          description: "Naprzemienne sesje cardio i ćwiczeń siłowych.",
+          durationMinutes: 55,
+          imageSlug: "cardio-strength-mix",
+        },
+        exercises: [
+          { id: "ex-cs-1", workoutId: "wo-cardio-strength", order: 1, name: "Burpees", description: "Kondycja i moc w jednym", sets: 4, reps: 12, durationSeconds: null, imageSlug: "burpees" },
+          { id: "ex-cs-2", workoutId: "wo-cardio-strength", order: 2, name: "Wiosłowanie na maszynie", description: "Plecy i serce", sets: 3, reps: 15, durationSeconds: null, imageSlug: "rowing-machine" },
+          { id: "ex-cs-3", workoutId: "wo-cardio-strength", order: 3, name: "Skakanka", description: "Sprint w rytmie skakanki", sets: 4, reps: null, durationSeconds: 90, imageSlug: "jump-rope" },
+          { id: "ex-cs-4", workoutId: "wo-cardio-strength", order: 4, name: "Plank", description: "Stabilizacja core po wysiłku", sets: 3, reps: null, durationSeconds: 45, imageSlug: "plank" },
+        ],
+      },
+    ],
+  },
 ];
 
 export async function seedDatabase(db: DB) {
-  const existing = await db.select().from(schema.fitnessPlan).limit(1);
-  if (existing.length > 0) return;
-
   for (const { plan, workouts } of PLANS) {
+    const existingPlan = await db.select().from(schema.fitnessPlan).where(eq(schema.fitnessPlan.id, plan.id)).limit(1);
+    if (existingPlan.length > 0) continue;
+
     await db.insert(schema.fitnessPlan).values(plan);
     for (const { workout, exercises } of workouts) {
       await db.insert(schema.planWorkout).values(workout);

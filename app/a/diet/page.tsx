@@ -147,55 +147,64 @@ export default function DietPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="heading text-4xl mb-1">Przepisy</h1>
-            <p className="text-muted-foreground text-sm">
-              Posiłki dopasowane do Twoich celów
-            </p>
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="heading text-4xl mb-1">Przepisy</h1>
+              <p className="text-muted-foreground text-sm">
+                Wybierz przepisy dopasowane do celu i porze dnia.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {goalFilterOptions.map((opt) => {
+                const isMyGoal = opt.value !== "all" && opt.value === userGoal;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setGoalFilter(opt.value)}
+                    className={
+                      "rounded-full border px-4 py-2 text-xs font-semibold transition-all whitespace-nowrap " +
+                      (goalFilter === opt.value
+                        ? "border-[var(--neon)] bg-[var(--neon)]/10 text-[var(--neon)]"
+                        : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground")
+                    }
+                    aria-pressed={goalFilter === opt.value}
+                  >
+                    {opt.label}
+                    {isMyGoal && <span className="ml-2 opacity-70">★</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {goalFilterOptions.map((opt) => {
-              const isMyGoal = opt.value !== "all" && opt.value === userGoal;
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setGoalFilter(opt.value)}
-                  className={
-                    "rounded-full border px-4 py-2 text-xs font-semibold transition-all whitespace-nowrap " +
-                    (goalFilter === opt.value
-                      ? "border-[var(--neon)] bg-[var(--neon)]/10 text-[var(--neon)]"
-                      : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground")
-                  }
-                  aria-pressed={goalFilter === opt.value}
-                >
-                  {opt.label}
-                  {isMyGoal && <span className="ml-2 opacity-70">★</span>}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
-        <div className="mt-6 overflow-x-auto pb-2">
-          <div className="inline-flex flex-wrap gap-2">
-            {mealTabs.map((tab) => (
-              <button
-                key={tab.value}
-                type="button"
-                onClick={() => setMealType(tab.value)}
-                className={
-                  "rounded-full border px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap " +
-                  (mealType === tab.value
-                    ? "border-[var(--neon)] bg-[var(--neon)]/10 text-[var(--neon)]"
-                    : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground")
-                }
-                aria-pressed={mealType === tab.value}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="rounded-3xl border border-border bg-background/90 p-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Wyświetlanie: <span className="text-foreground font-semibold">{mealTabs.find((tab) => tab.value === mealType)?.label}</span> • Cel: <span className="text-foreground font-semibold">{goalFilterOptions.find((opt) => opt.value === goalFilter)?.label}</span>
+              </p>
+              <nav className="overflow-x-auto" aria-label="Selekcja posiłków">
+                <div className="inline-flex gap-2 min-w-max">
+                  {mealTabs.map((tab) => (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setMealType(tab.value)}
+                      className={
+                        "rounded-full border px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap " +
+                        (mealType === tab.value
+                          ? "border-[var(--neon)] bg-[var(--neon)]/10 text-[var(--neon)]"
+                          : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground")
+                      }
+                      aria-pressed={mealType === tab.value}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </nav>
+            </div>
           </div>
         </div>
 
