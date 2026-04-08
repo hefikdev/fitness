@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import { Dumbbell, Weight, TrendingUp, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -16,6 +17,8 @@ export default function DashboardPage() {
   const weightEntries = trpc.weight.list.useQuery();
   const name = authSession?.data?.user?.name ?? "Gość";
   const latestWeight = weightEntries.data?.[0]?.weightKg ?? profile.data?.currentWeightKg;
+
+  const isLoading = profile.isPending || activePlan.isPending || weightEntries.isPending;
 
   const goalLabel =
     profile.data?.goal === "gain_mass"
@@ -48,29 +51,39 @@ export default function DashboardPage() {
           })}
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <StatCard
-            icon={<Dumbbell size={20} className="text-[var(--neon)]" />}
-            label="Aktywny plan"
-            value={activePlanLabel}
-            delay={0}
-          />
-          <StatCard
-            icon={<Weight size={20} className="text-[var(--neon)]" />}
-            label="Aktualna waga"
-            value={latestWeight ? `${latestWeight} kg` : "–"}
-            delay={0.1}
-          />
-          <StatCard
-            icon={<TrendingUp size={20} className="text-[var(--neon)]" />}
-            label="Cel treningowy"
-            value={goalLabel}
-            delay={0.2}
-          />
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-24 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <StatCard
+              icon={<Dumbbell size={20} className="text-[var(--neon)]" />}
+              label="Aktywny plan"
+              value={activePlanLabel}
+              delay={0}
+            />
+            <StatCard
+              icon={<Weight size={20} className="text-[var(--neon)]" />}
+              label="Aktualna waga"
+              value={latestWeight ? `${latestWeight} kg` : "–"}
+              delay={0.1}
+            />
+            <StatCard
+              icon={<TrendingUp size={20} className="text-[var(--neon)]" />}
+              label="Cel treningowy"
+              value={goalLabel}
+              delay={0.2}
+            />
+          </div>
+        )}
 
         {/* Active plan widget */}
-        {activePlan.data && (
+        {activePlan.isPending ? (
+          <Skeleton className="h-28 rounded-xl mb-6" />
+        ) : activePlan.data ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -97,7 +110,7 @@ export default function DashboardPage() {
               </p>
             </Link>
           </motion.div>
-        )}
+        ) : null}
 
         <div className="grid grid-cols-1 gap-3">
           <QuickLink
