@@ -1,6 +1,6 @@
 # FitForge
 
-A full-stack fitness app built with Next.js 16, TypeScript, Turbopack, tRPC, Drizzle ORM + SQLite, BetterAuth, and Motion animations.
+A full-stack fitness app built with Next.js 16, TypeScript, Turbopack, tRPC, Drizzle ORM + SQLite, Better Auth and Motion animations.
 
 ## Getting Started
 

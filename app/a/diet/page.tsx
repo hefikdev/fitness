@@ -5,7 +5,6 @@ import { motion } from "motion/react";
 import { trpc } from "@/lib/trpc/client";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Clock, Flame, Beef, Target } from "lucide-react";
 import Link from "next/link";
 
@@ -61,9 +60,9 @@ function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
     >
       <Link
         href={`/a/diet/${recipe.id}`}
-        className="group block rounded-xl border border-border hover:border-[var(--neon)] transition-colors p-4 h-full"
+        className="group block rounded-3xl border border-border hover:border-[var(--neon)] transition-colors p-5 h-full"
       >
-        <div className="flex items-start justify-between mb-2 gap-2">
+        <div className="flex items-start justify-between mb-3 gap-3">
           <h3 className="font-semibold text-base leading-snug group-hover:text-[var(--neon)] transition-colors">
             {recipe.name}
           </h3>
@@ -71,10 +70,10 @@ function RecipeCard({ recipe, index }: { recipe: Recipe; index: number }) {
             {mealLabels[recipe.mealType]}
           </Badge>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-5">
           {recipe.description}
         </p>
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <Flame size={12} className="text-orange-400" />
             {recipe.calories} kcal
@@ -106,7 +105,7 @@ function RecipeGrid({ mealType, goalFilter }: { mealType: MealType; goalFilter: 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-40 rounded-xl" />
+          <Skeleton key={i} className="h-48 rounded-3xl" />
         ))}
       </div>
     );
@@ -135,9 +134,6 @@ export default function DietPage() {
   const userGoal = profile.data?.goal as GoalFilter | undefined;
   const [goalFilter, setGoalFilter] = useState<GoalFilter>("all");
 
-  // Once the profile loads, default the filter to the user's own goal
-  const effectiveFilter: GoalFilter = goalFilter;
-
   const goalFilterOptions: { value: GoalFilter; label: string }[] = [
     { value: "all", label: "Wszystkie" },
     { value: "gain_mass", label: "Budowanie masy" },
@@ -151,52 +147,61 @@ export default function DietPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <h1 className="heading text-4xl mb-1">Przepisy</h1>
-        <p className="text-muted-foreground text-sm mb-4">
-          Posiłki dopasowane do Twoich celów
-        </p>
-
-        {/* Goal filter */}
-        <div className="flex items-center gap-2 mb-6 flex-wrap">
-          <Target size={14} className="text-muted-foreground shrink-0" />
-          <span className="text-xs text-muted-foreground">Cel:</span>
-          {goalFilterOptions.map((opt) => {
-            const isMyGoal = opt.value !== "all" && opt.value === userGoal;
-            return (
-              <button
-                key={opt.value}
-                onClick={() => setGoalFilter(opt.value)}
-                className={[
-                  "text-xs px-3 py-1 rounded-full border transition-colors",
-                  effectiveFilter === opt.value
-                    ? "border-[var(--neon)] text-[var(--neon)] bg-[var(--neon)]/10"
-                    : "border-border text-muted-foreground hover:border-foreground hover:text-foreground",
-                ].join(" ")}
-              >
-                {opt.label}
-                {isMyGoal && <span className="ml-1 opacity-60">★</span>}
-              </button>
-            );
-          })}
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="heading text-4xl mb-1">Przepisy</h1>
+            <p className="text-muted-foreground text-sm">
+              Posiłki dopasowane do Twoich celów
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {goalFilterOptions.map((opt) => {
+              const isMyGoal = opt.value !== "all" && opt.value === userGoal;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setGoalFilter(opt.value)}
+                  className={
+                    "rounded-full border px-4 py-2 text-xs font-semibold transition-all whitespace-nowrap " +
+                    (goalFilter === opt.value
+                      ? "border-[var(--neon)] bg-[var(--neon)]/10 text-[var(--neon)]"
+                      : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground")
+                  }
+                  aria-pressed={goalFilter === opt.value}
+                >
+                  {opt.label}
+                  {isMyGoal && <span className="ml-2 opacity-70">★</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        <Tabs
-          value={mealType}
-          onValueChange={(v) => setMealType(v as MealType)}
-        >
-          <TabsList className="mb-6 h-auto flex-wrap gap-1">
-            {mealTabs.map((t) => (
-              <TabsTrigger key={t.value} value={t.value}>
-                {t.label}
-              </TabsTrigger>
+        <div className="mt-6 overflow-x-auto pb-2">
+          <div className="inline-flex flex-wrap gap-2">
+            {mealTabs.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setMealType(tab.value)}
+                className={
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap " +
+                  (mealType === tab.value
+                    ? "border-[var(--neon)] bg-[var(--neon)]/10 text-[var(--neon)]"
+                    : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground")
+                }
+                aria-pressed={mealType === tab.value}
+              >
+                {tab.label}
+              </button>
             ))}
-          </TabsList>
-          {mealTabs.map((t) => (
-            <TabsContent key={t.value} value={t.value}>
-              <RecipeGrid mealType={t.value} goalFilter={effectiveFilter} />
-            </TabsContent>
-          ))}
-        </Tabs>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <RecipeGrid mealType={mealType} goalFilter={goalFilter} />
+        </div>
       </motion.div>
     </main>
   );

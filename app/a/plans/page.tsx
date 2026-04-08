@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { trpc } from "@/lib/trpc/client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -85,7 +84,7 @@ function PlanCard({
       <Link href={`/a/plans/${plan.id}`} className="block h-full group">
         <div
           className={[
-            "h-full rounded-xl border overflow-hidden transition-colors",
+            "h-full rounded-3xl border overflow-hidden transition-colors duration-200",
             isCompleted
               ? "border-[var(--neon)]/40 hover:border-[var(--neon)]"
               : isActive
@@ -109,7 +108,7 @@ function PlanCard({
               </span>
             )}
           </div>
-          <div className="p-4 flex flex-col gap-3">
+          <div className="p-5 flex flex-col gap-3">
             <p className="text-sm text-muted-foreground line-clamp-2">{plan.description}</p>
             {isActive && typeof progressPct === "number" && (
               <div>
@@ -117,7 +116,7 @@ function PlanCard({
                 <p className="text-[10px] text-muted-foreground">{progressPct}% ukończono</p>
               </div>
             )}
-            <div className="flex items-center gap-2 flex-wrap mt-auto">
+            <div className="flex flex-wrap items-center gap-2 mt-auto">
               <Badge variant="outline">{categoryLabels[plan.category]}</Badge>
               <span className={`text-xs font-medium ${difficultyClasses[plan.difficulty]}`}>
                 {difficultyLabels[plan.difficulty]}
@@ -143,7 +142,7 @@ function PlanGrid({ category }: { category: Category }) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-56 rounded-xl" />
+          <Skeleton key={i} className="h-56 rounded-3xl" />
         ))}
       </div>
     );
@@ -184,30 +183,39 @@ export default function PlansPage() {
 
   return (
     <main className="p-6 md:p-8">
-      <h1 className="heading text-4xl mb-1">Plany Treningowe</h1>
-      <p className="text-muted-foreground text-sm mb-6">
-        Wybierz plan dopasowany do swoich celów
-      </p>
-
-      <Tabs
-        value={category}
-        onValueChange={(v: string) => setCategory(v as Category)}
-        className="w-full"
-      >
-        <TabsList className="mb-6 h-auto flex-wrap gap-1">
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h1 className="heading text-4xl mb-1">Plany Treningowe</h1>
+          <p className="text-muted-foreground text-sm">
+            Wybierz plan dopasowany do swoich celów
+          </p>
+        </div>
+        <nav
+          className="flex flex-wrap items-center gap-2 rounded-3xl border border-border bg-background/95 p-2 shadow-sm"
+          aria-label="Kategorie planów"
+        >
           {categories.map((c) => (
-            <TabsTrigger key={c.value} value={c.value}>
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => setCategory(c.value)}
+              className={
+                "rounded-full px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-[var(--neon)] " +
+                (category === c.value
+                  ? "bg-[var(--neon)]/10 text-[var(--neon)] border border-[var(--neon)]"
+                  : "bg-transparent text-muted-foreground border border-transparent hover:text-foreground hover:border-border")
+              }
+              aria-pressed={category === c.value}
+            >
               {c.label}
-            </TabsTrigger>
+            </button>
           ))}
-        </TabsList>
+        </nav>
+      </div>
 
-        {categories.map((c) => (
-          <TabsContent key={c.value} value={c.value}>
-            <PlanGrid category={c.value} />
-          </TabsContent>
-        ))}
-      </Tabs>
+      <div className="mt-8">
+        <PlanGrid category={category} />
+      </div>
     </main>
   );
 }
