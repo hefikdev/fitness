@@ -132,6 +132,12 @@ export default function DashboardPage() {
             delay={0.5}
           />
           <QuickLink
+            href="/a/calculator"
+            label="Kalkulator fitness"
+            sub="Oblicz swoje zapotrzebowanie kaloryczne"
+            delay={0.55}
+          />
+          <QuickLink
             href="/a/diet"
             label="Odkryj przepisy"
             sub="Posiłki wspierające Twoje cele"

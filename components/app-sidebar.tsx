@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Dumbbell, Weight, Utensils, Settings, LogOut, BarChart3, BookOpen, Sparkles, Leaf } from "lucide-react";
+import { LayoutDashboard, Dumbbell, Weight, Utensils, Settings, LogOut, BarChart3, BookOpen, Sparkles, Leaf, Calculator } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 
 const navItems = [
   { href: "/a/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/a/analytics", label: "Analizy", icon: BarChart3 },
+  { href: "/a/calculator", label: "Kalkulator", icon: Calculator },
   { href: "/a/plans", label: "Plany", icon: Dumbbell },
   { href: "/a/workout-library", label: "Biblioteka", icon: BookOpen },
   { href: "/a/nutrition", label: "Odżywianie", icon: Leaf },
@@ -66,6 +67,7 @@ export function AppSidebar() {
 const mobileNavItems = [
   { href: "/a/dashboard", label: "Główna", icon: LayoutDashboard },
   { href: "/a/analytics", label: "Analizy", icon: BarChart3 },
+  { href: "/a/calculator", label: "Kalkulator", icon: Calculator },
   { href: "/a/plans", label: "Plany", icon: Dumbbell },
   { href: "/a/weight", label: "Waga", icon: Weight },
   { href: "/a/diet", label: "Dieta", icon: Utensils },
