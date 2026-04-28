@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, protectedProcedure } from "@/lib/trpc/init";
 import { db } from "@/lib/db";
-import { fitnessPlan, planWorkout, userPlanEnrollment, userWorkoutCompletion } from "@/lib/db/schema";
+import { fitnessPlan, planWorkout, userPlanEnrollment, userWorkoutCompletion, userExerciseCompletion } from "@/lib/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -108,5 +108,41 @@ export const progressRouter = router({
         .update(userPlanEnrollment)
         .set({ completedAt: new Date() })
         .where(eq(userPlanEnrollment.id, input.enrollmentId));
+    }),
+
+  getCompletedExercises: protectedProcedure.query(async ({ ctx }) => {
+    const rows = await db.query.userExerciseCompletion.findMany({
+      where: eq(userExerciseCompletion.userId, ctx.session.user.id),
+    });
+    return rows.map((r) => r.exerciseId);
+  }),
+
+  toggleExercise: protectedProcedure
+    .input(z.object({ exerciseId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const existing = await db.query.userExerciseCompletion.findFirst({
+        where: and(
+          eq(userExerciseCompletion.userId, ctx.session.user.id),
+          eq(userExerciseCompletion.exerciseId, input.exerciseId)
+        ),
+      });
+      if (existing) {
+        await db
+          .delete(userExerciseCompletion)
+          .where(
+            and(
+              eq(userExerciseCompletion.userId, ctx.session.user.id),
+              eq(userExerciseCompletion.exerciseId, input.exerciseId)
+            )
+          );
+        return { checked: false };
+      } else {
+        await db.insert(userExerciseCompletion).values({
+          id: randomUUID(),
+          userId: ctx.session.user.id,
+          exerciseId: input.exerciseId,
+        });
+        return { checked: true };
+      }
     }),
 });

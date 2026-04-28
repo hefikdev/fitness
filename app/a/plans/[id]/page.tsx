@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { trpc } from "@/lib/trpc/client";
 import { Badge } from "@/components/ui/badge";
@@ -89,16 +89,43 @@ function WorkoutItem({
   isEnrolled,
   onComplete,
   completing,
+  completedExerciseIds,
+  onToggleExercise,
 }: {
   workout: Workout;
   isCompleted: boolean;
   isEnrolled: boolean;
   onComplete: (notes?: string) => void;
   completing: boolean;
+  completedExerciseIds: string[] | undefined;
+  onToggleExercise: (exerciseId: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [showNotes, setShowNotes] = useState(false);
+  const [checkedExercises, setCheckedExercises] = useState<Set<string>>(new Set());
+  const [initialized, setInitialized] = useState(false);
   const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (!initialized && completedExerciseIds !== undefined) {
+      setCheckedExercises(
+        new Set(workout.exercises.filter((ex) => completedExerciseIds.includes(ex.id)).map((ex) => ex.id))
+      );
+      setInitialized(true);
+    }
+  }, [completedExerciseIds, initialized, workout.exercises]);
+
+  const allChecked = workout.exercises.length > 0 && checkedExercises.size === workout.exercises.length;
+  const anyChecked = checkedExercises.size > 0;
+
+  function toggleExercise(id: string) {
+    setCheckedExercises((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    onToggleExercise(id);
+  }
 
   return (
     <motion.div
@@ -124,6 +151,11 @@ function WorkoutItem({
         </div>
         <div className="flex items-center gap-3 shrink-0 ml-2">
           {isCompleted && <CheckCircle2 size={18} className="text-[var(--neon)]" />}
+          {!isCompleted && anyChecked && (
+            <span className="text-xs text-muted-foreground">
+              {checkedExercises.size}/{workout.exercises.length}
+            </span>
+          )}
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock size={12} />
             {workout.durationMinutes} min
@@ -147,55 +179,59 @@ function WorkoutItem({
           >
             <div className="px-4 pb-4 border-t border-border pt-3 space-y-2">
               {workout.exercises.map((ex) => (
-                <div key={ex.id} className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-medium">{ex.name}</p>
-                    <p className="text-xs text-muted-foreground">{ex.description}</p>
+                <div key={ex.id} className="flex items-start gap-3">
+                  {isEnrolled && !isCompleted && (
+                    <button
+                      type="button"
+                      onClick={() => toggleExercise(ex.id)}
+                      className="mt-0.5 shrink-0"
+                      aria-label={checkedExercises.has(ex.id) ? "Odznacz" : "Zaznacz"}
+                    >
+                      {checkedExercises.has(ex.id) ? (
+                        <CheckCircle2 size={18} className="text-[var(--neon)]" />
+                      ) : (
+                        <Circle size={18} className="text-muted-foreground" />
+                      )}
+                    </button>
+                  )}
+                  {isCompleted && (
+                    <CheckCircle2 size={18} className="text-[var(--neon)] mt-0.5 shrink-0" />
+                  )}
+                  <div className="flex-1 flex items-start justify-between gap-2">
+                    <div>
+                      <p className={cn("text-sm font-medium", checkedExercises.has(ex.id) && "line-through text-muted-foreground")}>{ex.name}</p>
+                      <p className="text-xs text-muted-foreground">{ex.description}</p>
+                    </div>
+                    <ExerciseMeta exercise={ex} />
                   </div>
-                  <ExerciseMeta exercise={ex} />
                 </div>
               ))}
 
-              {isEnrolled && !isCompleted && (
-                <div className="mt-3 space-y-2">
-                  {showNotes ? (
-                    <>
-                      <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Notatki z treningu (opcjonalnie)…"
-                        rows={3}
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[var(--neon)]/50 resize-none"
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          className="flex-1 bg-[var(--neon)] text-black hover:bg-[var(--neon)]/80"
-                          onClick={() => onComplete(notes)}
-                          disabled={completing}
-                        >
-                          {completing ? "Zapisuję…" : "Potwierdź ukończenie"}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => setShowNotes(false)}
-                        >
-                          Anuluj
-                        </Button>
-                      </div>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full border-[var(--neon)]/50 text-[var(--neon)] hover:bg-[var(--neon)]/10"
-                      onClick={() => setShowNotes(true)}
-                    >
-                      Oznacz jako ukończony
-                    </Button>
-                  )}
+              {isEnrolled && !isCompleted && allChecked && (
+                <div className="mt-4 space-y-2 border-t border-border pt-3">
+                  <p className="text-xs text-[var(--neon)] font-medium">Wszystkie ćwiczenia ukończone! 💪</p>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Notatki z treningu (opcjonalnie)…"
+                    rows={2}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[var(--neon)]/50 resize-none"
+                  />
+                  <Button
+                    size="sm"
+                    className="w-full bg-[var(--neon)] text-black hover:bg-[var(--neon)]/80"
+                    onClick={() => onComplete(notes)}
+                    disabled={completing}
+                  >
+                    {completing ? "Zapisuję…" : "Zapisz trening ✓"}
+                  </Button>
                 </div>
+              )}
+
+              {isEnrolled && !isCompleted && !allChecked && anyChecked && (
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+                  Zaznacz pozostałe ćwiczenia, aby ukończyć trening.
+                </p>
               )}
             </div>
           </motion.div>
@@ -212,6 +248,7 @@ export default function PlanDetailPage() {
   const { data: plan, isPending } = trpc.plans.getById.useQuery({ id });
   const { data: enrollments } = trpc.progress.getEnrollments.useQuery();
   const { data: completedWorkoutIds } = trpc.progress.getCompletedWorkouts.useQuery();
+  const { data: completedExerciseIds } = trpc.progress.getCompletedExercises.useQuery();
 
   const utils = trpc.useUtils();
   const enrollMutation = trpc.progress.enrollInPlan.useMutation({
@@ -224,6 +261,9 @@ export default function PlanDetailPage() {
         description: "Świetna robota! Twój postęp został zapisany.",
       });
     },
+  });
+  const toggleExerciseMutation = trpc.progress.toggleExercise.useMutation({
+    onSuccess: () => utils.progress.getCompletedExercises.invalidate(),
   });
   const markPlanCompleteMutation = trpc.progress.markPlanComplete.useMutation({
     onSuccess: () => {
@@ -265,7 +305,16 @@ export default function PlanDetailPage() {
   const workouts = plan.workouts ?? [];
   const totalWorkouts = workouts.length;
   const completedCount = workouts.filter((w) => completedWorkoutIds?.includes(w.id)).length;
-  const progressPercent = totalWorkouts > 0 ? Math.round((completedCount / totalWorkouts) * 100) : 0;
+  // Exercise-level progress
+  const allExerciseIds = workouts.flatMap((w) => w.exercises.map((ex) => ex.id));
+  const totalExercises = allExerciseIds.length;
+  const exercisesInCompletedWorkouts = workouts
+    .filter((w) => completedWorkoutIds?.includes(w.id))
+    .flatMap((w) => w.exercises.map((ex) => ex.id));
+  const doneExercises = new Set(
+    [...(completedExerciseIds ?? []), ...exercisesInCompletedWorkouts].filter((id) => allExerciseIds.includes(id))
+  );
+  const progressPercent = totalExercises > 0 ? Math.round((doneExercises.size / totalExercises) * 100) : 0;
 
   return (
     <main className="p-6 md:p-8 max-w-3xl mx-auto">
@@ -308,7 +357,7 @@ export default function PlanDetailPage() {
         {enrollment ? (
           <div>
             <p className="text-sm font-medium mb-2">
-              Twój postęp: {completedCount}/{totalWorkouts} treningów
+              Twój postęp: {doneExercises.size}/{totalExercises} ćwiczeń ({completedCount}/{totalWorkouts} treningów)
             </p>
             <Progress value={progressPercent} className="h-2 mb-1" />
             <p className="text-xs text-muted-foreground mt-1">{progressPercent}% ukończono</p>
@@ -357,6 +406,8 @@ export default function PlanDetailPage() {
             isEnrolled={!!enrollment}
             onComplete={(notes) => completeWorkoutMutation.mutate({ workoutId: workout.id, notes })}
             completing={completeWorkoutMutation.isPending}
+            completedExerciseIds={completedExerciseIds}
+            onToggleExercise={(exerciseId) => toggleExerciseMutation.mutate({ exerciseId })}
           />
         ))}
       </div>

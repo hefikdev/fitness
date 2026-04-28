@@ -91,7 +91,6 @@ body {
 /* Neon accent glow */
 .neon {
   color: var(--neon);
-  text-shadow: 0 0 8px var(--neon), 0 0 20px var(--neon);
 }
 
 .neon-border {

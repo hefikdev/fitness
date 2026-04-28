@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Dumbbell, Weight, Utensils, Settings, LogOut, BarChart3, BookOpen, Sparkles, Leaf, Calculator } from "lucide-react";
+import { LayoutDashboard, Dumbbell, Weight, Utensils, Settings, LogOut, BarChart3, BookOpen, Sparkles, Leaf, Calculator, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/lib/auth-client";
 
@@ -14,6 +14,7 @@ const navItems = [
   { href: "/a/workout-library", label: "Biblioteka", icon: BookOpen },
   { href: "/a/nutrition", label: "Odżywianie", icon: Leaf },
   { href: "/a/diet", label: "Dieta", icon: Utensils },
+  { href: "/a/calories", label: "Kalorie", icon: Flame },
   { href: "/a/tips", label: "Porady", icon: Sparkles },
   { href: "/a/weight", label: "Waga", icon: Weight },
   { href: "/a/settings", label: "Ustawienia", icon: Settings },

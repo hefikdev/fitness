@@ -5,8 +5,10 @@ import { motion } from "motion/react";
 import { trpc } from "@/lib/trpc/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Clock, Flame, Beef, Wheat, Droplets } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Clock, Flame, Beef, Wheat, Droplets, Plus } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const goalLabels: Record<string, string> = {
   gain_mass: "Budowanie masy",
@@ -24,6 +26,11 @@ const mealLabels: Record<string, string> = {
 export default function RecipePage() {
   const { id } = useParams<{ id: string }>();
   const { data: recipe, isPending } = trpc.diet.getById.useQuery({ id });
+
+  const addCalorieMutation = trpc.calorie.add.useMutation({
+    onSuccess: () => toast.success(`Dodano ${recipe?.calories} kcal do dziennika!`),
+    onError: () => toast.error("Błąd podczas dodawania kalorii."),
+  });
 
   if (isPending) {
     return (
@@ -85,10 +92,25 @@ export default function RecipePage() {
           ))}
         </div>
 
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-8">
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6">
           <Clock size={14} />
           Czas przygotowania: <span className="text-foreground font-medium">{recipe.prepMinutes} min</span>
         </div>
+
+        <Button
+          className="mb-8 bg-[var(--neon)] text-black hover:bg-[var(--neon)]/80 gap-2"
+          onClick={() =>
+            addCalorieMutation.mutate({
+              date: new Date().toISOString().split("T")[0],
+              calories: recipe.calories,
+              label: recipe.name,
+            })
+          }
+          disabled={addCalorieMutation.isPending}
+        >
+          <Plus size={16} />
+          {addCalorieMutation.isPending ? "Dodaję…" : `Zjadam to (+${recipe.calories} kcal)`}
+        </Button>
 
         {/* Ingredients */}
         <section className="mb-8">

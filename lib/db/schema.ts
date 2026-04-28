@@ -81,6 +81,15 @@ export const userWorkoutCompletion = sqliteTable("user_workout_completion", {
   notes: text("notes"),
 });
 
+export const userExerciseCompletion = sqliteTable("user_exercise_completion", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  exerciseId: text("exercise_id").notNull(),
+  completedAt: integer("completed_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});
+
 export const weightEntry = sqliteTable("weight_entry", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),
@@ -89,6 +98,17 @@ export const weightEntry = sqliteTable("weight_entry", {
     .notNull()
     .$defaultFn(() => new Date()),
   notes: text("notes"),
+});
+
+export const calorieEntry = sqliteTable("calorie_entry", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD
+  calories: integer("calories").notNull(),
+  label: text("label"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 // ─── Relations ────────────────────────────────────────────────────────────────
